@@ -1,7 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse, HTMLResponse
 import pandas as pd
-import numpy as np
 import joblib
 import os
 import logging
@@ -177,125 +176,11 @@ async def predict(file: UploadFile = File(...)):
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Внутренняя ошибка сервера: {str(e)}")
 
-@app.get("/", response_class=HTMLResponse)
-async def home():
-    """Домашняя страница с информацией о сервисе"""
-    status_html = f"""
-    <div style="color: {'green' if model is not None and preprocessor is not None else 'red'}; font-weight: bold;">
-        {'✅ СЕРВИС ГОТОВ К РАБОТЕ' if model is not None and preprocessor is not None else '❌ СЕРВИС НЕДОСТУПЕН'}
-    </div>
-    """
-    
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Heart Attack Risk Prediction API</title>
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                margin: 40px;
-                line-height: 1.6;
-            }}
-            h1 {{
-                color: #333;
-            }}
-            .container {{
-                max-width: 800px;
-                margin: 0 auto;
-            }}
-            .status {{
-                padding: 15px;
-                margin: 20px 0;
-                border-radius: 5px;
-                background-color: #f8f9fa;
-            }}
-            .endpoints {{
-                margin: 30px 0;
-            }}
-            .endpoint {{
-                margin: 10px 0;
-                padding: 10px;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-            }}
-            code {{
-                background-color: #f1f1f1;
-                padding: 2px 5px;
-                border-radius: 3px;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>API для прогнозирования риска сердечного приступа</h1>
-            
-            <div class="status">
-                <h2>Статус сервиса</h2>
-                {status_html}
-                <p><strong>Модель загружена:</strong> {'✅ Да' if model is not None else '❌ Нет'}</p>
-                <p><strong>Предпроцессор загружен:</strong> {'✅ Да' if preprocessor is not None else '❌ Нет'}</p>
-            </div>
-            
-            <div class="endpoints">
-                <h2>Доступные эндпоинты</h2>
-                
-                <div class="endpoint">
-                    <h3>POST /predict</h3>
-                    <p>Прогнозирование риска сердечного приступа на основе CSV файла</p>
-                    <p><strong>Параметры:</strong></p>
-                    <ul>
-                        <li><code>file</code>: CSV файл с данными пациентов (без заголовков, первый столбец - ID)</li>
-                    </ul>
-                    <p><strong>Формат ответа:</strong></p>
-                    <pre>
-{{
-  "predictions": [
-    {{"id": 1, "prediction": 0}},
-    {{"id": 2, "prediction": 1}},
-    ...
-  ],
-  "status": "success"
-}}
-                    </pre>
-                </div>
-                
-                <div class="endpoint">
-                    <h3>GET /docs</h3>
-                    <p>Документация API (автоматически сгенерированная)</p>
-                </div>
-            </div>
-            
-            <div class="instructions">
-                <h2>Инструкция по использованию</h2>
-                <p>1. Перейдите на страницу <a href="/docs">/docs</a> для просмотра документации API</p>
-                <p>2. Используйте эндпоинт <code>/predict</code> для отправки CSV файла с данными пациентов</p>
-                <p>3. Скачайте CSV файл с предсказаниями из ответа</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
-
-@app.get("/health")
-async def health_check():
-    """Эндпоинт для проверки здоровья сервиса"""
-    return {
-        "status": "healthy" if (model is not None and preprocessor is not None) else "unhealthy",
-        "model_loaded": model is not None,
-        "preprocessor_loaded": preprocessor is not None,
-        "service_name": "Heart Attack Risk Prediction API",
-        "version": "1.0.0"
-    }
-
 if __name__ == "__main__":
     import uvicorn
     logger.info("=== ЗАПУСК FASTAPI СЕРВЕРА ===")
     logger.info("Сервер будет доступен по адресам:")
-    logger.info("- http://localhost:8000 (главная страница)")
-    logger.info("- http://localhost:8000/docs (документация API)")
-    logger.info("- http://localhost:8000/health (проверка состояния)")
+    logger.info("- http://localhost:8000/docs (проверка состояния)")
     logger.info("Для остановки сервера нажмите CTRL+C")
     logger.info("===============================")
     
